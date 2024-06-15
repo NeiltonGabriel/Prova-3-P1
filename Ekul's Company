@@ -1,0 +1,87 @@
+#include <stdio.h>
+
+void somar(double vetor[], int posicao, int posicao_aux, int final)
+{
+    double soma = vetor[posicao] + vetor[posicao_aux];
+    if (vetor[posicao_aux] == -1) somar(vetor, posicao, posicao_aux + 1, final);
+    else if ((soma) <= 1)
+    {
+        vetor[posicao] = -1;
+        vetor[posicao_aux] = -1;
+        return;
+    }
+    else if (posicao_aux == (final - 1))
+    {
+        vetor[posicao] = -1;
+        return;
+    }
+    else somar(vetor, posicao, posicao_aux + 1, final);
+}
+
+int vagas(double vetor[], int posicao, int final, int resposta)
+{
+    if (posicao == (final - 1))
+    {
+        if (vetor[posicao] == -1) return resposta;
+        else
+        {
+            resposta++;
+            return resposta;
+        }
+    }
+    else if (vetor[posicao] == -1) return vagas(vetor, posicao + 1, final, resposta);
+    else
+    {
+        somar(vetor, posicao, posicao + 1, final);
+        return vagas(vetor, posicao + 1, final, resposta + 1);
+    }
+
+}
+
+void bolha(double vetor[], int posicao, int tamanho)
+{
+    if (posicao == (tamanho - 1)) return;
+    else
+    {
+        if (vetor[posicao] < vetor[posicao + 1])
+        {
+            double caixa = vetor[posicao];
+            vetor[posicao] = vetor[posicao + 1];
+            vetor[posicao + 1] = caixa;
+        }
+        bolha(vetor, posicao + 1, tamanho);
+    }
+}
+
+void ordenar(double vetor[], int posicao, int tamanho)
+{
+
+    if (posicao == (tamanho - 1)) return;
+    else
+    {
+        bolha(vetor, posicao, tamanho);
+        ordenar(vetor, 0, tamanho - 1);
+    }
+}
+
+
+void ler_vetor(double vetor[], int posicao, int final)
+{
+    if (posicao == final) return;
+    scanf("%lf", &vetor[posicao]);
+    ler_vetor(vetor, ++posicao, final);
+}
+
+int main()
+{
+    int quantidade, r = 0;
+    scanf("%d", &quantidade);
+    double carros[quantidade];
+    ler_vetor(carros, 0, quantidade);
+    ordenar(carros, 0, quantidade);
+
+    r = vagas(carros, 0, quantidade, 0);
+    printf("%d\n", r);
+
+    return 0;
+}
