@@ -1,0 +1,122 @@
+#include <stdio.h>
+
+void imprimir_vetor(int vetor[], int posicao, int final) //auto explicativo
+{
+    if (posicao == final) return;
+    printf("%d ", vetor[posicao]);
+    imprimir_vetor(vetor, posicao + 1, final);
+}
+
+void encher_pilha(int pilha[], int jogador[], int posicao, int final) //vai contado quais cartas sairam
+{
+    if (posicao == final) return;
+    pilha[jogador[posicao] - 1]++;
+    encher_pilha(pilha, jogador, posicao + 1, final);
+}
+
+void ler(int vetor[], int posicao, int final) //auto explicativo
+{
+    if (posicao == final) return;
+    scanf("%d", &vetor[posicao]);
+    ler(vetor, posicao + 1, final);
+}
+
+int pontos(int vetor[], int posicao, int final, int pontuacao) //conta os pontos
+{
+    if (posicao == final) return pontuacao;
+    if (vetor[posicao] >= 10) pontuacao += 10;
+    else pontuacao += vetor[posicao];
+    return pontos(vetor, posicao + 1, final, pontuacao);
+}
+
+int existe(int pilha[], int posicao, int final, int valor) //verifica se ainda tem a carta para que a bia ganhe
+{
+    if (posicao == final) return 0;
+    if (posicao == (valor - 1))
+    {
+       if (pilha[posicao] < 4) return 1;
+       else return 0;
+    }
+    else return existe(pilha, posicao + 1, final, valor);
+}
+
+int da_ganhar(int pilha[], int posicao, int final, int valor_hugo, int valor_bia)
+{
+    if (posicao == final)
+    {
+        if (valor_hugo < 11) return da_ganhar(pilha, 0, final, valor_hugo + 1, valor_bia);
+        else return 0;
+    }
+    if (posicao == (valor_hugo - 1))
+    {
+        if (pilha[posicao] < 4 && posicao >= (valor_hugo - 1) && posicao <= (valor_bia - 1)) return posicao + 1;
+        else return da_ganhar(pilha, 0, final, valor_hugo + 1, valor_bia);
+    }
+    else return da_ganhar(pilha, posicao + 1, final, valor_hugo, valor_bia);
+}
+
+int main()
+{
+    int rodadas, pontos_bia = 0, pontos_hugo = 0, pnbia, pnhugo, existe_bia, existe_hugo;
+    int hugo[2];
+    int bia[2];
+    int pilha[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; //deixa a pilha toda igual a 0
+
+    scanf("%d", &rodadas);
+    scanf("%d %d", &hugo[0], &hugo[1]);
+    encher_pilha(pilha, hugo, 0, 2);
+    scanf("%d %d", &bia[0], &bia[1]);
+    encher_pilha(pilha, bia, 0, 2);
+
+    int comuns[rodadas];
+    ler(comuns, 0, rodadas);
+    encher_pilha(pilha, comuns, 0, rodadas);
+    //imprimir_vetor(pilha, 0, 13);
+    
+    pontos_bia = pontos(bia, 0, 2, 0) + pontos(comuns, 0, rodadas, 0);
+    pontos_hugo = pontos(hugo, 0, 2, 0) + pontos(comuns, 0, rodadas, 0);
+    pnbia = 23 - pontos_bia;
+    pnhugo = 23 - pontos_hugo;
+    existe_bia = existe(pilha, 0, 13, pnbia);
+    existe_hugo = existe(pilha, 0, 13, pnhugo);
+    //printf("\nbia: %d\nbia precisa: %d\nexiste bia: %d\nhugo: %d\nhugo precisa: %d\nexiste hugo: %d\n", pontos_bia, pnbia, existe_bia, pontos_hugo, pnhugo, existe_hugo);
+
+    int aux;
+    if (existe_bia == 1 && existe_hugo == 1)
+    {
+        if (pnhugo < pnbia)
+        {
+            aux = da_ganhar(pilha, 0, 13, pnhugo + 1, pnbia);
+            (aux == 0) ? printf("-1\n") : printf("%d\n", aux);
+        }
+        if (pnhugo == pnbia) printf("%d\n", pnbia);
+        if (pnhugo > pnbia) printf("%d\n", pnbia);
+    }
+    else if (existe_bia == 1 && existe_hugo == 0)
+    {
+        if (pnbia > 10) printf("-1\n");
+        else printf("%d\n", pnbia);
+    }
+    else if (existe_bia == 0 && existe_hugo == 1) printf("-1\n");
+    else if (existe_bia == 0 && existe_hugo == 0)
+    {
+        if (pnhugo < pnbia)
+        {
+            if (pnhugo + 1 == pnbia) printf("-1\n");
+            else
+            {
+                if (pnbia > 10) printf("-1\n");
+                else
+                {
+                    aux = pnbia - pnhugo;
+                    int ultima = existe(pilha, 0, 13, aux);
+                    (ultima == 1) ? printf("%d\n", aux) : printf("-1\n");
+                }
+            }
+        }
+        if (pnhugo == pnbia) printf("-1\n");
+        if (pnhugo > pnbia) printf("-1\n");
+    }
+
+    return 0;
+}
